@@ -16,7 +16,7 @@
 
     textarea {
       width: 100%;
-      height: 150px;
+      height: 180px;
       margin: 10px 0;
       padding: 10px;
       font-size: 14px;
@@ -26,7 +26,6 @@
       padding: 10px 16px;
       font-size: 14px;
       cursor: pointer;
-      margin-bottom: 10px;
     }
 
     select {
@@ -63,19 +62,21 @@
   <h2>Bullet Formatter</h2>
 
   <div class="box">
-    <h3>How to use</h3>
-    <p>Use curly braces for grouped items:</p>
-    <code>{ item 1 &lt;&gt; item 2 &lt;&gt; item 3 }</code>
-
-    <p>Or reverse mode using bullet points:</p>
-    <code>- item 1<br/>- item 2<br/>- item 3</code>
+    <h3>How it works</h3>
+    <p>
+      Only lines starting with <code>-</code> are converted into bullet groups.
+    </p>
+    <p>
+      Bullet groups are wrapped in <code>{ }</code> and separated by <code>|</code>.
+    </p>
+    <p>Paragraphs are preserved automatically.</p>
   </div>
 
   <label>
     Mode:
     <select id="mode">
-      <option value="forward">Text → Bullets</option>
-      <option value="reverse">Bullets → { &lt;&gt; }</option>
+      <option value="forward">Text → { bullets }</option>
+      <option value="reverse">{ bullets } → Text</option>
     </select>
   </label>
 
@@ -92,26 +93,70 @@
 
       let result = "";
 
+      // -------------------------
+      // FORWARD: text → { bullets }
+      // -------------------------
       if (mode === "forward") {
-        // { a <> b <> c } → bullets
-        result = input.replace(/\{(.*?)\}/g, (match, inner) => {
-          const parts = inner
-            .split("<>")
+        const lines = input.split("\n");
+
+        let output = [];
+        let bulletBuffer = [];
+
+        function flushBullets() {
+          if (bulletBuffer.length > 0) {
+            const cleaned = bulletBuffer.map(b =>
+              b.replace(/^\s*[-•*]\s*/, "").trim()
+            );
+            output.push(`{ ${cleaned.join(" | ")} }`);
+            bulletBuffer = [];
+          }
+        }
+
+        for (let line of lines) {
+          const trimmed = line.trim();
+
+          if (!trimmed) {
+            flushBullets();
+            output.push("");
+            continue;
+          }
+
+          if (/^\s*[-•*]\s*/.test(trimmed)) {
+            bulletBuffer.push(trimmed);
+          } else {
+            flushBullets();
+            output.push(line);
+          }
+        }
+
+        flushBullets();
+        result = output.join("\n");
+      }
+
+      // -------------------------
+      // REVERSE: { bullets } → text
+      // -------------------------
+      if (mode === "reverse") {
+        const match = input.match(/\{(.*?)\}/s);
+
+        if (!match) {
+          result = input;
+        } else {
+          const before = input.split("{")[0];
+          const after = input.split("}")[1] || "";
+
+          const items = match[1]
+            .split("|")
             .map(p => p.trim())
             .filter(Boolean);
 
-          return "\n" + parts.map(p => `- ${p}`).join("\n");
-        });
-      }
-
-      if (mode === "reverse") {
-        // bullets → { a <> b <> c }
-        const items = input
-          .split("\n")
-          .map(line => line.replace(/^\s*[-•*]\s*/, "").trim())
-          .filter(Boolean);
-
-        result = `{ ${items.join(" <> ")} }`;
+          result =
+            before.trim() +
+            "\n\n" +
+            items.map(i => "- " + i).join("\n") +
+            "\n\n" +
+            after.trim();
+        }
       }
 
       document.getElementById("output").textContent = result;
