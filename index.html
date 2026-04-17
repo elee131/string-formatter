@@ -35,6 +35,27 @@
 <body>
 
   <h2>Bullet Formatter</h2>
+  <div style="background: #fff; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px;">
+  <h3>How to use</h3>
+  <p>
+    Write normal text, then include bullet points inside curly braces <code>{ }</code>.
+  </p>
+
+  <p><b>Use this format:</b></p>
+  <code>{ point 1 &lt;&gt; point 2 &lt;&gt; point 3 }</code>
+
+  <p><b>Example:</b></p>
+  <code>
+    This is a sentence. Here are items: { apples &lt;&gt; bananas &lt;&gt; oranges }
+  </code>
+
+  <p><b>Output:</b></p>
+  <code>
+    - apples<br/>
+    - bananas<br/>
+    - oranges
+  </code>
+</div>
 
   <textarea id="input" placeholder="Paste your text here..."></textarea>
   <button onclick="formatText()">Format</button>
