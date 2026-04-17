@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bullet Formatter</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,18 +13,27 @@
       padding: 20px;
       background: #f7f7f7;
     }
+
     textarea {
       width: 100%;
       height: 150px;
-      margin-bottom: 10px;
+      margin: 10px 0;
       padding: 10px;
       font-size: 14px;
     }
+
     button {
       padding: 10px 16px;
       font-size: 14px;
       cursor: pointer;
+      margin-bottom: 10px;
     }
+
+    select {
+      padding: 6px;
+      margin-left: 8px;
+    }
+
     pre {
       background: white;
       padding: 15px;
@@ -30,50 +41,78 @@
       border: 1px solid #ddd;
       margin-top: 10px;
     }
+
+    .box {
+      background: #fff;
+      padding: 12px;
+      border: 1px solid #ddd;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+
+    code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
   </style>
 </head>
+
 <body>
 
   <h2>Bullet Formatter</h2>
-  <div style="background: #fff; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px;">
-  <h3>How to use</h3>
-  <p>
-    Write normal text, then include bullet points inside curly braces <code>{ }</code>.
-  </p>
 
-  <p><b>Use this format:</b></p>
-  <code>{ point 1 &lt;&gt; point 2 &lt;&gt; point 3 }</code>
+  <div class="box">
+    <h3>How to use</h3>
+    <p>Use curly braces for grouped items:</p>
+    <code>{ item 1 &lt;&gt; item 2 &lt;&gt; item 3 }</code>
 
-  <p><b>Example:</b></p>
-  <code>
-    This is a sentence. Here are items: { apples &lt;&gt; bananas &lt;&gt; oranges }
-  </code>
+    <p>Or reverse mode using bullet points:</p>
+    <code>- item 1<br/>- item 2<br/>- item 3</code>
+  </div>
 
-  <p><b>Output:</b></p>
-  <code>
-    - apples<br/>
-    - bananas<br/>
-    - oranges
-  </code>
-</div>
+  <label>
+    Mode:
+    <select id="mode">
+      <option value="forward">Text → Bullets</option>
+      <option value="reverse">Bullets → { &lt;&gt; }</option>
+    </select>
+  </label>
 
   <textarea id="input" placeholder="Paste your text here..."></textarea>
-  <button onclick="formatText()">Format</button>
+
+  <button onclick="formatText()">Convert</button>
 
   <pre id="output"></pre>
 
   <script>
     function formatText() {
+      const mode = document.getElementById("mode").value;
       const input = document.getElementById("input").value;
 
-      const result = input.replace(/\{(.*?)\}/g, (match, inner) => {
-        const parts = inner
-          .split("<>")
-          .map(p => p.trim())
-          .filter(p => p.length > 0);
+      let result = "";
 
-        return "\n" + parts.map(p => `- ${p}`).join("\n");
-      });
+      if (mode === "forward") {
+        // { a <> b <> c } → bullets
+        result = input.replace(/\{(.*?)\}/g, (match, inner) => {
+          const parts = inner
+            .split("<>")
+            .map(p => p.trim())
+            .filter(Boolean);
+
+          return "\n" + parts.map(p => `- ${p}`).join("\n");
+        });
+      }
+
+      if (mode === "reverse") {
+        // bullets → { a <> b <> c }
+        const items = input
+          .split("\n")
+          .map(line => line.replace(/^\s*[-•*]\s*/, "").trim())
+          .filter(Boolean);
+
+        result = `{ ${items.join(" <> ")} }`;
+      }
 
       document.getElementById("output").textContent = result;
     }
