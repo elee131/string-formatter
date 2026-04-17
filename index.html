@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bullet Formatter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    pre {
+      background: white;
+      padding: 15px;
+      white-space: pre-wrap;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Bullet Formatter</h2>
+
+  <textarea id="input" placeholder="Paste your text here..."></textarea>
+  <button onclick="formatText()">Format</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    function formatText() {
+      const input = document.getElementById("input").value;
+
+      const result = input.replace(/\{(.*?)\}/g, (match, inner) => {
+        const parts = inner
+          .split("<>")
+          .map(p => p.trim())
+          .filter(p => p.length > 0);
+
+        return "\n" + parts.map(p => `- ${p}`).join("\n");
+      });
+
+      document.getElementById("output").textContent = result;
+    }
+  </script>
+
+</body>
+</html>
